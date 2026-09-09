@@ -1,0 +1,154 @@
+openapi: 3.1.0
+
+info:
+  title: API de precios - Decskill
+  version: 1.0.0
+  description: API para consultar el precio aplicable a un producto de una cadena en una fecha y hora determinadas.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Prices
+    description: Operaciones relacionadas con la consulta de precios
+
+paths:
+  /api/v1/prices:
+    get:
+      tags:
+        - Prices
+      summary: Obtener el precio
+      operationId: getPrice
+
+      parameters:
+        - name: queryDate
+          in: query
+          required: true
+          description: Fecha y hora con offset de aplicación de la tarifa. Se compara el instante dentro del intervalo inclusivo de vigencia; fechas con distintos offsets que representen el mismo instante seleccionan la misma tarifa.
+          schema:
+            type: string
+            format: date-time
+          example: "2020-06-14T16:00:00+02:00"
+
+        - name: productId
+          in: query
+          required: true
+          description: Identificador de producto.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+          example: 35455
+
+        - name: brandId
+          in: query
+          required: true
+          description: Identificador de cadena.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+          example: 1
+
+      responses:
+        "200":
+          description: Precio aplicable encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceResponse"
+
+        "400":
+          description: Parámetros de entrada no válidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidParameters:
+                  value:
+                    status: 400
+                    message: Parámetros de entrada no válidos.
+
+        "404":
+          description: No se ha encontrado un precio aplicable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                priceNotFound:
+                  value:
+                    status: 404
+                    message: No se ha encontrado un precio aplicable.
+
+components:
+  schemas:
+    PriceResponse:
+      type: object
+      required:
+        - productId
+        - brandId
+        - priceList
+        - startDate
+        - endDate
+        - price
+        - currency
+      properties:
+        productId:
+          type: integer
+          format: int64
+          description: Identificador de producto.
+          examples:
+            - 35455
+
+        brandId:
+          type: integer
+          format: int64
+          description: Identificador de cadena.
+          examples:
+            - 1
+
+        priceList:
+          type: integer
+          format: int64
+          description: Tarifa que se debe aplicar.
+          examples:
+            - 2
+
+        startDate:
+          type: string
+          format: date-time
+          description: Inicio inclusivo de la vigencia, con el offset almacenado de la tarifa, independiente del offset de la consulta.
+          examples:
+            - "2020-06-14T15:00:00+02:00"
+
+        endDate:
+          type: string
+          format: date-time
+          description: Fin inclusivo de la vigencia, con el offset almacenado de la tarifa, independiente del offset de la consulta.
+          examples:
+            - "2020-06-14T18:30:00+02:00"
+
+        price:
+          type: number
+          description: Precio final que se debe aplicar.
+          examples:
+            - 25.45
+
+        currency:
+          type: string
+          description: ISO de la moneda.
+          examples:
+            - EUR
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+
+        message:
+          type: string
