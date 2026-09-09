@@ -43,17 +43,6 @@ class PriceApiE2ETest {
                 .andExpect(jsonPath("$.currency").value("EUR"));
     }
 
-    private String queryPrice(String queryDate) throws Exception {
-        return mockMvc.perform(get("/api/v1/prices")
-                        .param("queryDate", queryDate)
-                        .param("productId", "35455")
-                        .param("brandId", "1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.priceList").value(2))
-                .andExpect(jsonPath("$.startDate").value("2020-06-14T15:00:00+02:00"))
-                .andReturn().getResponse().getContentAsString();
-    }
-
     @Test
     void shouldReturnNotFoundWhenNoApplicablePriceExists() throws Exception {
         mockMvc.perform(get("/api/v1/prices")

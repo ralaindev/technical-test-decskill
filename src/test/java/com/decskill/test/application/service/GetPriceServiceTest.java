@@ -49,7 +49,7 @@ class GetPriceServiceTest {
                 .findApplicablePrice(queryDate, 35455L, 1L))
                 .thenReturn(Optional.of(expectedPrice));
 
-        Price result = getPriceService.getPrice(queryDate,35455L,1L);
+        Price result = getPriceService.getPrice(queryDate, 35455L, 1L);
 
         assertEquals(expectedPrice, result);
         verify(priceRepositoryPort).findApplicablePrice(same(queryDate), eq(35455L), eq(1L));
