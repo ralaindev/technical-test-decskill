@@ -1,7 +1,6 @@
 package com.decskill.test.infrastructure.input.rest;
 
 import com.decskill.test.application.port.in.GetPriceUseCase;
-import com.decskill.test.domain.model.Price;
 import com.decskill.test.infrastructure.input.rest.api.PricesApi;
 import com.decskill.test.infrastructure.input.rest.mapper.PriceRestMapper;
 import com.decskill.test.infrastructure.input.rest.model.PriceResponse;

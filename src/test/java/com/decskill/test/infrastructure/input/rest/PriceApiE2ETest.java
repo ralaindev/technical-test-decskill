@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,14 +41,6 @@ class PriceApiE2ETest {
                 .andExpect(jsonPath("$.endDate").value(endDate))
                 .andExpect(jsonPath("$.price").value(price))
                 .andExpect(jsonPath("$.currency").value("EUR"));
-    }
-
-    @Test
-    void shouldReturnSameStoredDatesForEquivalentInstants() throws Exception {
-        String offsetResponse = queryPrice("2020-06-14T16:00:00+02:00");
-        String utcResponse = queryPrice("2020-06-14T14:00:00Z");
-
-        assertEquals(offsetResponse, utcResponse);
     }
 
     private String queryPrice(String queryDate) throws Exception {

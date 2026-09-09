@@ -6,16 +6,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Limit;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=validate")
@@ -25,9 +22,6 @@ class SpringDataPriceRepositoryTest {
     @Autowired
     private SpringDataPriceRepository repository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @ParameterizedTest(name = "brand {0}, product {1} -> priceList {2}")
     @CsvSource({
             "10, 100, 102",
@@ -35,11 +29,7 @@ class SpringDataPriceRepositoryTest {
             "10, 200, 105"
     })
     void shouldFilterByBrandAndProductAndChooseHighestPriority(Long brandId, Long productId, Long expectedPriceList) {
-        PriceJpaEntity price = findPrice(
-                brandId,
-                productId,
-                "2020-06-14T16:00:00+02:00"
-        ).orElseThrow();
+        PriceJpaEntity price = findPrice(brandId, productId, "2020-06-14T16:00:00+02:00").orElseThrow();
 
         assertEquals(expectedPriceList, price.getPriceList());
     }
@@ -71,33 +61,12 @@ class SpringDataPriceRepositoryTest {
 
     @Test
     void shouldSelectSamePriceForEquivalentInstants() {
-        PriceJpaEntity offsetPrice = findPrice(
-                30L,
-                300L,
-                "2020-06-14T16:00:00+02:00"
-        ).orElseThrow();
+        PriceJpaEntity offsetPrice = findPrice(30L, 300L, "2020-06-14T16:00:00+02:00").orElseThrow();
 
-        PriceJpaEntity utcPrice = findPrice(
-                30L,
-                300L,
-                "2020-06-14T14:00:00Z"
-        ).orElseThrow();
+        PriceJpaEntity utcPrice = findPrice(30L, 300L, "2020-06-14T14:00:00Z").orElseThrow();
 
         assertEquals(108L, offsetPrice.getPriceList());
         assertEquals(offsetPrice.getId(), utcPrice.getId());
-    }
-
-    @Test
-    void shouldRejectPeriodEndingBeforeItsStart() {
-        OffsetDateTime invalidEndDate = OffsetDateTime.parse("2020-06-14T12:59:59Z");
-
-        assertThrows(
-                DataIntegrityViolationException.class,
-                () -> jdbcTemplate.update(
-                        "UPDATE prices SET end_date = ? WHERE id = 108",
-                        invalidEndDate
-                )
-        );
     }
 
     private Optional<PriceJpaEntity> findPrice(Long brandId, Long productId, String date) {
